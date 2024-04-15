@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 
 const app = express();
+app.use(express.json());
 const JWT_SECRET = 'oijadsf9032rdfnml239';
 
 const Todo = mongoose.model('todos', {
@@ -25,9 +26,7 @@ app.get('/', async (req, res) => {
       msg: 'Please enter some todos in the list first.'
     });
   }
-  return res.status(200).json({
-    todos,
-  });
+  return res.status(200).send(todos);
 });
 
 app.post('/', (req, res) => {
@@ -39,6 +38,11 @@ app.post('/', (req, res) => {
   }
   const userDetails = jwt.verify(token, JWT_SECRET);
   const { title, description } = req.body;
+  if (!title || !description) {
+    return res.status(403).json({
+      msg: 'Please fill both the entries first.'
+    })
+  }
   const newTodo = new Todo({
     title,
     description,
